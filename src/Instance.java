@@ -6,7 +6,7 @@ import java.util.List;
  * surrounding DataSet.
  */
 public class Instance {
-  public String label;
+  public String label; //class
   public List<String> attributes = null;
 
   /**

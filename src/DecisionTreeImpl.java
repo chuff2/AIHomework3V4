@@ -40,6 +40,9 @@ public class DecisionTreeImpl extends DecisionTree {
     this.attributes = train.attributes;
     this.attributeValues = train.attributeValues;
     // TODO: add code here
+    
+    //helper function
+    DecisionTreeImplHelper(train.instances, train.attributes, null);
   }
 
   /**
@@ -142,4 +145,54 @@ public class DecisionTreeImpl extends DecisionTree {
     }
     return -1;
   }
+  
+  
+  
+  
+  
+  /********************************************************************
+  //our own methods area
+  ********************************************************************/
+  private DecTreeNodeImpl DecisionTreeImplHelper(List<Instance> instances, 
+		  	List<String> attributes, List<Instance> parentExamples){
+	//if list of examples is empty. 
+    if (instances.isEmpty()){
+    	return mostCommonClass(instances);
+    }
+    else if (allTheSame){
+    	
+    }
+	  return null;
+  }
+  
+  private DecTreeNodeImpl mostCommonClass(List<Instance> instances){
+	  for (String singleLabel) {
+		  
+	  }
+	  return null;
+  }
+  
+  
+  private String allInstancesHaveSameClassification(DataSet train){
+	//run through all the instances and check if they all have the same classification
+    //used for the first else if clause below
+    boolean allTheSame = true;
+    boolean firstLabelCheck = true;
+    String prevLabel = "";
+    for (Instance singleInstance : train.instances){
+    	//if we are on the first instance, record its label, and continue to the next iteration
+    	if (firstLabelCheck){
+    		prevLabel = singleInstance.label;
+    		firstLabelCheck = false;
+    		continue;
+    	}
+    	else if (!singleInstance.label.equals(prevLabel)){
+    		allTheSame = false;
+    		break;
+    	}	
+    }
+	  return true;
+  }
+  
+  
 }

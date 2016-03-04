@@ -9,8 +9,8 @@ import java.util.List;
  * 
  */
 public class DecTreeNode {
-  String label; // for
-  String attribute;
+  String label; // like class (L, B, R)
+  String attribute; //like (A1, A2, A3, A4)
   String parentAttributeValue; // if is the root, set to null
   boolean terminal;
   List<DecTreeNode> children;
@@ -27,6 +27,8 @@ public class DecTreeNode {
     }
   }
 
+  
+  
   /**
    * Add child to the node.
    * 
