@@ -63,6 +63,7 @@ public class DecisionTreeImpl extends DecisionTree {
   public String classify(Instance instance) {
 
     // TODO: add code here
+    return null;
   }
 
   @Override
@@ -71,6 +72,7 @@ public class DecisionTreeImpl extends DecisionTree {
     this.attributes = train.attributes;
     this.attributeValues = train.attributeValues;
     // TODO: add code here
+
   }
   
   @Override
@@ -154,22 +156,80 @@ public class DecisionTreeImpl extends DecisionTree {
   //our own methods area
   ********************************************************************/
   private DecTreeNodeImpl DecisionTreeImplHelper(List<Instance> instances, 
-		  	List<String> attributes, List<Instance> parentExamples){
+		  	List<String> attributes, List<Instance> parentInstances){
+
+  	boolean allTheSame = true;
+  	String label;
+  	DecTreeNodeImpl node = null;
+
 	//if list of examples is empty. 
     if (instances.isEmpty()){
     	return mostCommonClass(instances);
     }
-    else if (allTheSame){
-    	
+
+    //sets allTheSame to false if it finds any labels different
+    label = instances.get(0).label;
+    for (Instance i : instances){
+    	if (!label.equals(i.label))
+    		allTheSame = false;
     }
-	  return null;
+    if (allTheSame){
+    	// make new node with label class and return
+    	node = new DecTreeNodeImpl(label, null, null, true);
+    	return node;
+    }
+
+    //return most common from parent if no more attributes to split on
+    if (attributes.isEmpty()){
+    	return mostCommonClass(parentInstances);
+    }
+
+    ///////////////////// SUDO
+
+    // find best attribute to split on TODO make helper fcn
+    String bestAttr = getBestAttribute(attributes);
+
+    // make a new node N with this attribute
+    node = new DecTreeNodeImpl(null, bestAttr, null, false);
+
+    // for each possible value of the attribute:
+    List<String> attrVals = this.attributeValues.get(bestAttr);
+    	// make list of instances with that value
+    	// new node = DecTreeNodeImplHelper(.....) (recursive call)
+    	// make new node a child of node N
+
+    //return node
+
+	  return node;
   }
   
   private DecTreeNodeImpl mostCommonClass(List<Instance> instances){
-	  for (String singleLabel) {
-		  
+	  int commonLabelIndex = 0;
+	  int highestCount = 0;
+	  int currCount;
+	  DecTreeNodeImpl node;
+
+	  // count number for each label and update vars to find most common
+	  for (String singleLabel : this.labels) {
+	  	  currCount = 0;
+
+	  	  // count instances with this label
+		  for (Instance i : instances){
+		  	if (i.label.equals(singleLabel))
+		  		currCount++;
+		  }
+		  // check if new max found TODO check how we break ties
+		  if (currCount > highestCount){
+		  	highestCount = currCount;
+		  	commonLabelIndex = getLabelIndex(singleLabel);
+		  }
+
 	  }
-	  return null;
+
+	  //TODO check what null params should be: String _label, String _attribute, String _parentAttributeValue, boolean _terminal
+	  node = new DecTreeNodeImpl(this.labels.get(commonLabelIndex), null, null, true);
+
+	  return node;
   }
   
   
@@ -191,8 +251,13 @@ public class DecisionTreeImpl extends DecisionTree {
     		break;
     	}	
     }
-	  return true;
+	  return null;
   }
   
+  private String getBestAttribute(List<String> attributes){
+  	// TODO figure out H() fcn
+
+  	return null;	
+  }
   
 }
