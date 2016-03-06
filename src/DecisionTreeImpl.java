@@ -233,18 +233,57 @@ public class DecisionTreeImpl extends DecisionTree {
   }
   
   private String getBestAttribute(List<String> attributes, List<Instance> instances){
-  	// TODO figure out H() fcn
 	  
-	//find regular H (loop through all instances and count occurences of L, B, R)
+	//list of attribute maps (each of A1, A2, A3, ... has its own map)
+	List<HashMap<String, List<Integer>>> listOfAttrMaps = new ArrayList<HashMap<String, List<Integer>>>();
+	//zeroing out the map at every possible attribute and each attribute's values
+	for (String singleAttribute : this.attributes){
+		HashMap<String, List<Integer>> map = new HashMap<String, List<Integer>>();
+		//going through each value and setting its count to 0
+		for (String value : this.attributeValues.get(singleAttribute)){
+			//first index is the total count, while each subsequent index corresponds
+			//to the individual label counts
+			List<Integer> counts = new ArrayList<Integer>();
+			counts.add(0, 0);
+			for (int i = 1; i <= this.labels.size(); i++){
+				counts.add(i, 0);
+			}
+			map.put(value, counts);
+		}
+	}
+	
+	//count occurences of L, B, R using this map
 	HashMap<String, Integer> labelMap = new HashMap<String, Integer>();
+	//looping through all the instances
 	for (Instance singleInstance : instances){
+		//populate the count (value) for each label/class found in instances
 		if (labelMap.get(singleInstance.label) == null){
 			labelMap.put(singleInstance.label, 1);
 		}
 		else{
 			labelMap.put(singleInstance.label, labelMap.get(singleInstance.label) + 1);
 		}
+		
+		//increment counts for the various values in the instance 
+		for (int i = 0; i < singleInstance.attributes.size(); i++){
+			//get the encoded list of integer values
+			List<Integer> counts = listOfAttrMaps.get(i).get(singleInstance.attributes.get(i));
+			//always increment the total count
+			int newTotal = counts.get(0) + 1;
+			counts.remove(0);
+			counts.add(0, newTotal);
+			//get index of the label we have encountered
+			int labelIndex = getLabelIndex(singleInstance.label);
+			int newLabelCount = counts.get(labelIndex) + 1;
+			counts.remove(labelIndex);
+			counts.add(labelIndex, newLabelCount);
+			//put the augmented count list back into the map
+			listOfAttrMaps.get(i).put(singleInstance.attributes.get(i), counts);
+		}
+		
 	}
+	
+	
 	//loop through key's (labels (L, B, R)) and start forming the H value through its formula
 	double HValue = 0;
 	double total = (double) instances.size();
@@ -253,11 +292,20 @@ public class DecisionTreeImpl extends DecisionTree {
         Map.Entry pair = (Map.Entry)it.next();
         HValue += ((double) pair.getValue()/total)*(Math.log((double) pair.getValue()/total)/Math.log(2));
     }
+    
+    
 	//single loop going through A1, A2, A3, A4
+    List<Double> condHList = new ArrayList<Double>(); 
 	for (String singleAttribute : attributes){
-		//find regular H, once for A1 (loop through all instances and count occurences of 1,2,3,4,5)
-		
-		//find conditional H
+		double condHValue = 0;
+		//find conditional H (i.e. H(class | A1, A2, ...))
+		int index = getAttributeIndex(singleAttribute);
+		HashMap<String, Integer> map = listOfAttrMaps.get(index);
+		it = map.entrySet().iterator();
+	    while (it.hasNext()) {
+	        Map.Entry pair = (Map.Entry)it.next();
+	        condHValue += ((double) pair.getValue()/total)*(Math.log((double) /pair.getValue())/Math.log(2));
+	    }
 	}
   	return null;	
   }
