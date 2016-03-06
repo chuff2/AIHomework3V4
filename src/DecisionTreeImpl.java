@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -25,8 +27,6 @@ public class DecisionTreeImpl extends DecisionTree {
    */
   DecisionTreeImpl() {
     // no code necessary this is void purposefully
-
-    //Phteven
   }
 
   /**
@@ -187,7 +187,7 @@ public class DecisionTreeImpl extends DecisionTree {
     ///////////////////// SUDO
 
     // find best attribute to split on TODO make helper fcn
-    String bestAttr = getBestAttribute(attributes);
+    String bestAttr = getBestAttribute(attributes, instances);
 
     // make a new node N with this attribute
     node = new DecTreeNodeImpl(null, bestAttr, null, false);
@@ -232,31 +232,33 @@ public class DecisionTreeImpl extends DecisionTree {
 	  return node;
   }
   
-  
-  private String allInstancesHaveSameClassification(DataSet train){
-	//run through all the instances and check if they all have the same classification
-    //used for the first else if clause below
-    boolean allTheSame = true;
-    boolean firstLabelCheck = true;
-    String prevLabel = "";
-    for (Instance singleInstance : train.instances){
-    	//if we are on the first instance, record its label, and continue to the next iteration
-    	if (firstLabelCheck){
-    		prevLabel = singleInstance.label;
-    		firstLabelCheck = false;
-    		continue;
-    	}
-    	else if (!singleInstance.label.equals(prevLabel)){
-    		allTheSame = false;
-    		break;
-    	}	
-    }
-	  return null;
-  }
-  
-  private String getBestAttribute(List<String> attributes){
+  private String getBestAttribute(List<String> attributes, List<Instance> instances){
   	// TODO figure out H() fcn
-
+	  
+	//find regular H (loop through all instances and count occurences of L, B, R)
+	HashMap<String, Integer> labelMap = new HashMap<String, Integer>();
+	for (Instance singleInstance : instances){
+		if (labelMap.get(singleInstance.label) == null){
+			labelMap.put(singleInstance.label, 1);
+		}
+		else{
+			labelMap.put(singleInstance.label, labelMap.get(singleInstance.label) + 1);
+		}
+	}
+	//loop through key's (labels (L, B, R)) and start forming the H value through its formula
+	double HValue = 0;
+	double total = (double) instances.size();
+	Iterator it = labelMap.entrySet().iterator();
+    while (it.hasNext()) {
+        Map.Entry pair = (Map.Entry)it.next();
+        HValue += ((double) pair.getValue()/total)*(Math.log((double) pair.getValue()/total)/Math.log(2));
+    }
+	//single loop going through A1, A2, A3, A4
+	for (String singleAttribute : attributes){
+		//find regular H, once for A1 (loop through all instances and count occurences of 1,2,3,4,5)
+		
+		//find conditional H
+	}
   	return null;	
   }
   
