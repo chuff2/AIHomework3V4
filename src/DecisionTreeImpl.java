@@ -290,7 +290,7 @@ public class DecisionTreeImpl extends DecisionTree {
 	Iterator it = labelMap.entrySet().iterator();
     while (it.hasNext()) {
         Map.Entry pair = (Map.Entry)it.next();
-        HValue += ((double) pair.getValue()/total)*(Math.log((double) pair.getValue()/total)/Math.log(2));
+        HValue += -((double) pair.getValue()/total)*(Math.log((double) pair.getValue()/total)/Math.log(2));
     }
     
     
@@ -300,14 +300,36 @@ public class DecisionTreeImpl extends DecisionTree {
 		double condHValue = 0;
 		//find conditional H (i.e. H(class | A1, A2, ...))
 		int index = getAttributeIndex(singleAttribute);
-		HashMap<String, Integer> map = listOfAttrMaps.get(index);
+		//only look at attributes left in our list
+		HashMap<String, List<Integer>> map = listOfAttrMaps.get(index);
 		it = map.entrySet().iterator();
+	    //look at each attr value
 	    while (it.hasNext()) {
+	    	//attr value and counts pair
 	        Map.Entry pair = (Map.Entry)it.next();
-	        condHValue += ((double) pair.getValue()/total)*(Math.log((double) /pair.getValue())/Math.log(2));
+	        //get list of counts for this value where counts[0] = # occurance of val and counts[1-3] = # of this val that are L, B, R
+	        List<Integer> counts = pair.getValue();
+	        // H(label|attr) = #v1/total * H(#v1_L/#v1, #v1_B/#v1, #v1_R/#v1) + #v2/total * H(#v2_L/#v2, #v2_B/#v2, #v2_R/#v2) + ...
+	        for(int i = 1; i < counts.size(); i++){
+	        	//#v1/total * H(#v1_L/#v1, #v1_B/#v1, #v1_R/#v1) = #v1/total*H(#v1_L/#v1) + #v1/total*H(#v1_B/#v1) + #v1/total*H(#v1_R/#v1)
+	        	condHValue += -((double) counts.get(0)/total)*(Math.log((double) counts.get(i)/counts.get(0))/Math.log(2));
+	    	}
 	    }
+	    //add new condH to end of list.
+	    condHList.add(condHValue);
 	}
-  	return null;	
+
+	//loop through condHList looking for attr that gives largest H(label) - H(label|attr)
+	double minCondH = condHList.get(0);
+	double indexOfBestAttr = 0;
+	for (int i = 0; i < condHList.size(); i++){
+		if(minCondH > condHList.get(i)){
+			minCondH = condHList.get(i);
+			indexOfBestAttr = i;
+		}
+	}
+	//best attr will have same index in attributes that its condHValue had in the list of condHValues
+  	return attributes.get(i);	
   }
   
 }
