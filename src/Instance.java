@@ -7,7 +7,7 @@ import java.util.List;
  */
 public class Instance {
   public String label; //class
-  public List<String> attributes = null;
+  public List<String> attributes = null; 
 
   /**
    * Add attribute values in the order of attributes as specified by the dataset

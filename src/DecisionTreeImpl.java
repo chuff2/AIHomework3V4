@@ -188,19 +188,31 @@ public class DecisionTreeImpl extends DecisionTree {
 
     // find best attribute to split on TODO make helper fcn
     String bestAttr = getBestAttribute(attributes, instances);
+    // remove this attr from attributes list (not the master one though)
+    attributes.remove(bestAttr);
 
     // make a new node N with this attribute
     node = new DecTreeNodeImpl(null, bestAttr, null, false);
 
     // for each possible value of the attribute:
     List<String> attrVals = this.attributeValues.get(bestAttr);
+    for(String v: attrVals){
     	// make list of instances with that value
+    	List<Instance> valInstances = new ArrayList<Instance>();
+    	int attrIndex = getAttributeIndex(bestAttr);
+    	for(Instance i: instances){
+    		if(i.attributes.get(attrIndex).equals(v))
+    			valInstances.add(i);
+    	}
     	// new node = DecTreeNodeImplHelper(.....) (recursive call)
+    	DecTreeNodeImpl child = DecisionTreeImplHelper(valInstances, attributes, instances);
     	// make new node a child of node N
+    	child.setParentValue(bestAttr);
+    	node.children.add(child);
+    }
 
     //return node
-
-	  return node;
+    return node;
   }
   
   private DecTreeNodeImpl mostCommonClass(List<Instance> instances){
@@ -294,7 +306,7 @@ public class DecisionTreeImpl extends DecisionTree {
     }
     
     
-	//single loop going through A1, A2, A3, A4
+	//single loop going through A1, A2, A3, A4 (only the ones passed in/still left to choose from)
     List<Double> condHList = new ArrayList<Double>(); 
 	for (String singleAttribute : attributes){
 		double condHValue = 0;
@@ -306,7 +318,7 @@ public class DecisionTreeImpl extends DecisionTree {
 	    //look at each attr value
 	    while (it.hasNext()) {
 	    	//attr value and counts pair
-	        Map.Entry pair = (Map.Entry)it.next();
+	        Map.Entry<String, List<Integer>> pair = (Map.Entry<String, List<Integer>>)it.next();
 	        //get list of counts for this value where counts[0] = # occurance of val and counts[1-3] = # of this val that are L, B, R
 	        List<Integer> counts = pair.getValue();
 	        // H(label|attr) = #v1/total * H(#v1_L/#v1, #v1_B/#v1, #v1_R/#v1) + #v2/total * H(#v2_L/#v2, #v2_B/#v2, #v2_R/#v2) + ...
@@ -321,7 +333,7 @@ public class DecisionTreeImpl extends DecisionTree {
 
 	//loop through condHList looking for attr that gives largest H(label) - H(label|attr)
 	double minCondH = condHList.get(0);
-	double indexOfBestAttr = 0;
+	int indexOfBestAttr = 0;
 	for (int i = 0; i < condHList.size(); i++){
 		if(minCondH > condHList.get(i)){
 			minCondH = condHList.get(i);
@@ -329,7 +341,7 @@ public class DecisionTreeImpl extends DecisionTree {
 		}
 	}
 	//best attr will have same index in attributes that its condHValue had in the list of condHValues
-  	return attributes.get(i);	
+  	return attributes.get(indexOfBestAttr);
   }
   
 }
