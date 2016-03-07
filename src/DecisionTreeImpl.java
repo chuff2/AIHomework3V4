@@ -61,9 +61,22 @@ public class DecisionTreeImpl extends DecisionTree {
 
 	@Override
 	public String classify(Instance instance) {
-
-		// TODO: add code here
-		return null;
+		
+		if (this.root == null){
+			return null;
+		}
+		
+		//start from the root and move downwards
+		DecTreeNodeImpl currNode = (DecTreeNodeImpl) this.root;
+		//once we hit a terminal node, then we break out of this, and we return that terminal nodes value
+		while (!currNode.isTerminal()){
+			String currNodeAttr = currNode.getAttribute(); //like A1
+			int attrIndex = getAttributeIndex(currNodeAttr); 
+			int attrValue = Integer.parseInt(instance.attributes.get(attrIndex)) - 1; //value in instance
+			currNode = (DecTreeNodeImpl) currNode.getChildren().get(attrValue);
+		}
+		
+		return currNode.label;
 	}
 
 	@Override
@@ -291,7 +304,7 @@ public class DecisionTreeImpl extends DecisionTree {
 
 		//if list of examples is empty. 
 		if (instances.isEmpty()){
-			return mostCommonClass(instances);
+			return mostCommonClass(parentInstances);
 		}
 
 		//sets allTheSame to false if it finds any labels different
@@ -308,7 +321,7 @@ public class DecisionTreeImpl extends DecisionTree {
 
 		//return most common from parent if no more attributes to split on
 		if (attributes.isEmpty()){
-			return mostCommonClass(parentInstances);
+			return mostCommonClass(instances);
 		}
 
 		///////////////////// SUDO

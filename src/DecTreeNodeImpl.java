@@ -1,3 +1,4 @@
+import java.util.List;
 
 public class DecTreeNodeImpl extends DecTreeNode {
 
@@ -10,6 +11,18 @@ public class DecTreeNodeImpl extends DecTreeNode {
 	//	super(child);
 	//}
 
+	public String getAttribute(){
+		return this.attribute;
+	}
+	
+	public boolean isTerminal(){
+		return this.terminal;
+	}
+	
+	public List<DecTreeNode> getChildren(){
+		return this.children;
+	}
+	
 	public void setParentValue(String _parentAttrVal){
 		this.parentAttributeValue = _parentAttrVal;
 	}
