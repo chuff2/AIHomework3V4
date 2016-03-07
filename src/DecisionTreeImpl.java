@@ -98,7 +98,10 @@ public class DecisionTreeImpl extends DecisionTree {
   	}
   	
   	////////////////////////////////////////////////////////////////////////////////////
-	//
+	//First if-else simply counts the total number of L, B, and R's that occur. 
+  	//The for loop after that get the List<Integer> counts which is specific to a single
+  	//A1->3 combo (attribute->value). Index 0 of this list is the total count and subsequent
+  	//indexes correspond to the various classes (L, B, R)
 	////////////////////////////////////////////////////////////////////////////////////
   	//count occurences of L, B, R using this map
   	HashMap<String, Integer> labelMap = new HashMap<String, Integer>();
@@ -121,7 +124,7 @@ public class DecisionTreeImpl extends DecisionTree {
   			counts.remove(0);
   			counts.add(0, newTotal);
   			//get index of the label we have encountered
-  			int labelIndex = getLabelIndex(singleInstance.label);
+  			int labelIndex = getLabelIndex(singleInstance.label) + 1;
   			int newLabelCount = counts.get(labelIndex) + 1;
   			counts.remove(labelIndex);
   			counts.add(labelIndex, newLabelCount);
