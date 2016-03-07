@@ -134,6 +134,9 @@ public class DecisionTreeImpl extends DecisionTree {
   		
   	}
   	
+  	////////////////////////////////////////////////////////////////////////////////////////////////PRINT COUNTS
+  	//for (int i  = )
+  	
   	////////////////////////////////////////////////////////////////////////////////////
 	//
 	////////////////////////////////////////////////////////////////////////////////////
@@ -158,7 +161,7 @@ public class DecisionTreeImpl extends DecisionTree {
   		//only look at attributes left in our list
   		HashMap<String, List<Integer>> map = listOfAttrMaps.get(index);
   		it = map.entrySet().iterator();
-  	    //look at each attr value
+  	    //look at each value
   	    while (it.hasNext()) {
   	    	//attr value and counts pair
   	        Map.Entry<String, List<Integer>> pair = (Map.Entry<String, List<Integer>>)it.next();
@@ -168,8 +171,8 @@ public class DecisionTreeImpl extends DecisionTree {
   	        for(int i = 1; i < counts.size(); i++){
   	        	//#v1/total * H(#v1_L/#v1, #v1_B/#v1, #v1_R/#v1) = #v1/total*H(#v1_L/#v1) + #v1/total*H(#v1_B/#v1) + #v1/total*H(#v1_R/#v1)
   	        	if (counts.get(i) != 0){
-  	        		condHValue += -1*((double) counts.get(0)/total)*(Math.log((double) counts.get(i)/counts.get(0))/Math.log(2));
-  	        		System.out.println("HValue: " + HValue + " CondH: "+ condHValue + " Total: " + total + " counts.get(0): " + counts.get(0) + " counts.get(i): " + counts.get(i));
+  	        		condHValue += -((double) counts.get(0)/total)*((double) counts.get(i)/counts.get(0))*(Math.log((double) counts.get(i)/counts.get(0))/Math.log(2));
+  	        		//System.out.println("HValue: " + HValue + " CondH: "+ condHValue + " Total: " + total + " counts.get(0): " + counts.get(0) + " counts.get(i): " + counts.get(i));
   	        	}
   	    	}
   	    }
@@ -413,7 +416,7 @@ public class DecisionTreeImpl extends DecisionTree {
 			counts.remove(0);
 			counts.add(0, newTotal);
 			//get index of the label we have encountered
-			int labelIndex = getLabelIndex(singleInstance.label);
+			int labelIndex = getLabelIndex(singleInstance.label) + 1;
 			int newLabelCount = counts.get(labelIndex) + 1;
 			counts.remove(labelIndex);
 			counts.add(labelIndex, newLabelCount);
@@ -452,7 +455,7 @@ public class DecisionTreeImpl extends DecisionTree {
 	        // H(label|attr) = #v1/total * H(#v1_L/#v1, #v1_B/#v1, #v1_R/#v1) + #v2/total * H(#v2_L/#v2, #v2_B/#v2, #v2_R/#v2) + ...
 	        for(int i = 1; i < counts.size(); i++){
 	        	//#v1/total * H(#v1_L/#v1, #v1_B/#v1, #v1_R/#v1) = #v1/total*H(#v1_L/#v1) + #v1/total*H(#v1_B/#v1) + #v1/total*H(#v1_R/#v1)
-	        	condHValue += -((double) counts.get(0)/total)*(Math.log((double) counts.get(i)/counts.get(0))/Math.log(2));
+	        	condHValue += -((double) counts.get(0)/total)*((double) counts.get(i)/counts.get(0))*(Math.log((double) counts.get(i)/counts.get(0))/Math.log(2));
 	    	}
 	    }
 	    //add new condH to end of list.
