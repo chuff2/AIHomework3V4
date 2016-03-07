@@ -135,7 +135,8 @@ public class DecisionTreeImpl extends DecisionTree {
   	}
   	
   	////////////////////////////////////////////////////////////////////////////////////
-	//
+	//Forms the H value to be used... Loops through L,B,R and performs a calulation that is
+  	//added to the running total
 	////////////////////////////////////////////////////////////////////////////////////
   	//loop through key's (labels (L, B, R)) and start forming the H value through its formula
   	double HValue = 0;
@@ -151,7 +152,7 @@ public class DecisionTreeImpl extends DecisionTree {
   	////////////////////////////////////////////////////////////////////////////////////
   	//single loop going through A1, A2, A3, A4 (only the ones passed in/still left to choose from)
     List<Double> condHList = new ArrayList<Double>(); 
-  	for (String singleAttribute : attributes){
+  	for (String singleAttribute : this.attributes){
   		double condHValue = 0;
   		//find conditional H (i.e. H(class | A1, A2, ...))
   		int index = getAttributeIndex(singleAttribute);
@@ -168,8 +169,8 @@ public class DecisionTreeImpl extends DecisionTree {
   	        for(int i = 1; i < counts.size(); i++){
   	        	//#v1/total * H(#v1_L/#v1, #v1_B/#v1, #v1_R/#v1) = #v1/total*H(#v1_L/#v1) + #v1/total*H(#v1_B/#v1) + #v1/total*H(#v1_R/#v1)
   	        	if (counts.get(i) != 0){
-  	        		condHValue += -1*((double) counts.get(0)/total)*(Math.log((double) counts.get(i)/counts.get(0))/Math.log(2));
-  	        		System.out.println("HValue: " + HValue + " CondH: "+ condHValue + " Total: " + total + " counts.get(0): " + counts.get(0) + " counts.get(i): " + counts.get(i));
+  	        		condHValue += -((double) counts.get(i)/counts.get(0))*((double) counts.get(0)/total)*(Math.log((double) counts.get(i)/counts.get(0))/Math.log(2));
+  	        		//System.out.println("HValue: " + HValue + " CondH: "+ condHValue + " Total: " + total + " counts.get(0): " + counts.get(0) + " counts.get(i): " + counts.get(i));
   	        	}
   	    	}
   	    }
@@ -193,7 +194,7 @@ public class DecisionTreeImpl extends DecisionTree {
 	//
 	////////////////////////////////////////////////////////////////////////////////////
   	//best attr will have same index in attributes that its condHValue had in the list of condHValues
-    	//return attributes.get(indexOfBestAttr);
+    //return attributes.get(indexOfBestAttr);
   	for(int i = 0; i < condHList.size(); i++){
   		double hValTotal = HValue - condHList.get(i);
   		System.out.format(train.attributes.get(i) + " %.5f\n", hValTotal);
@@ -413,7 +414,7 @@ public class DecisionTreeImpl extends DecisionTree {
 			counts.remove(0);
 			counts.add(0, newTotal);
 			//get index of the label we have encountered
-			int labelIndex = getLabelIndex(singleInstance.label);
+			int labelIndex = getLabelIndex(singleInstance.label) + 1;
 			int newLabelCount = counts.get(labelIndex) + 1;
 			counts.remove(labelIndex);
 			counts.add(labelIndex, newLabelCount);
@@ -452,7 +453,7 @@ public class DecisionTreeImpl extends DecisionTree {
 	        // H(label|attr) = #v1/total * H(#v1_L/#v1, #v1_B/#v1, #v1_R/#v1) + #v2/total * H(#v2_L/#v2, #v2_B/#v2, #v2_R/#v2) + ...
 	        for(int i = 1; i < counts.size(); i++){
 	        	//#v1/total * H(#v1_L/#v1, #v1_B/#v1, #v1_R/#v1) = #v1/total*H(#v1_L/#v1) + #v1/total*H(#v1_B/#v1) + #v1/total*H(#v1_R/#v1)
-	        	condHValue += -((double) counts.get(0)/total)*(Math.log((double) counts.get(i)/counts.get(0))/Math.log(2));
+	        	condHValue += -((double) counts.get(i)/counts.get(0))*((double) counts.get(0)/total)*(Math.log((double) counts.get(i)/counts.get(0))/Math.log(2));
 	    	}
 	    }
 	    //add new condH to end of list.
