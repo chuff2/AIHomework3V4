@@ -42,7 +42,7 @@ public class DecisionTreeImpl extends DecisionTree {
     // TODO: add code here
     
     //helper function
-    DecisionTreeImplHelper(train.instances, train.attributes, null);
+    this.root = DecisionTreeImplHelper(train.instances, train.attributes, null);
   }
 
   /**
@@ -72,6 +72,111 @@ public class DecisionTreeImpl extends DecisionTree {
     this.attributes = train.attributes;
     this.attributeValues = train.attributeValues;
     // TODO: add code here
+    
+  //list of attribute maps (each of A1, A2, A3, ... has its own map)
+  	List<HashMap<String, List<Integer>>> listOfAttrMaps = new ArrayList<HashMap<String, List<Integer>>>();
+  	//zeroing out the map at every possible attribute and each attribute's values
+  	for (String singleAttribute : this.attributes){
+  		HashMap<String, List<Integer>> map = new HashMap<String, List<Integer>>();
+  		//going through each value and setting its count to 0
+  		for (String value : this.attributeValues.get(singleAttribute)){
+  			//first index is the total count, while each subsequent index corresponds
+  			//to the individual label counts
+  			List<Integer> counts = new ArrayList<Integer>();
+  			counts.add(0, 0);
+  			for (int i = 1; i <= this.labels.size(); i++){
+  				counts.add(i, 0);
+  			}
+  			map.put(value, counts);
+  		}
+  		listOfAttrMaps.add(map);
+  	}
+  	
+  	//count occurences of L, B, R using this map
+  	HashMap<String, Integer> labelMap = new HashMap<String, Integer>();
+  	//looping through all the instances
+  	for (Instance singleInstance : train.instances){
+  		//populate the count (value) for each label/class found in instances
+  		if (labelMap.get(singleInstance.label) == null){
+  			labelMap.put(singleInstance.label, 1);
+  		}
+  		else{
+  			labelMap.put(singleInstance.label, labelMap.get(singleInstance.label) + 1);
+  		}
+  		
+  		//increment counts for the various values in the instance 
+  		for (int i = 0; i < singleInstance.attributes.size(); i++){
+  			//get the encoded list of integer values
+  			List<Integer> counts = listOfAttrMaps.get(i).get(singleInstance.attributes.get(i));
+  			//always increment the total count
+  			int newTotal = counts.get(0) + 1;
+  			counts.remove(0);
+  			counts.add(0, newTotal);
+  			//get index of the label we have encountered
+  			int labelIndex = getLabelIndex(singleInstance.label);
+  			int newLabelCount = counts.get(labelIndex) + 1;
+  			counts.remove(labelIndex);
+  			counts.add(labelIndex, newLabelCount);
+  			//put the augmented count list back into the map
+  			listOfAttrMaps.get(i).put(singleInstance.attributes.get(i), counts);
+  		}
+  		
+  	}
+  	
+  	
+  	//loop through key's (labels (L, B, R)) and start forming the H value through its formula
+  	double HValue = 0;
+  	double total = (double) train.instances.size();
+  	Iterator it = labelMap.entrySet().iterator();
+      while (it.hasNext()) {
+          Map.Entry pair = (Map.Entry)it.next();
+          HValue += -((double) (int)pair.getValue()/total)*(Math.log((double) (int)pair.getValue()/total)/Math.log(2));
+      }
+      
+      
+  	//single loop going through A1, A2, A3, A4 (only the ones passed in/still left to choose from)
+    List<Double> condHList = new ArrayList<Double>(); 
+  	for (String singleAttribute : attributes){
+  		double condHValue = 0;
+  		//find conditional H (i.e. H(class | A1, A2, ...))
+  		int index = getAttributeIndex(singleAttribute);
+  		//only look at attributes left in our list
+  		HashMap<String, List<Integer>> map = listOfAttrMaps.get(index);
+  		it = map.entrySet().iterator();
+  	    //look at each attr value
+  	    while (it.hasNext()) {
+  	    	//attr value and counts pair
+  	        Map.Entry<String, List<Integer>> pair = (Map.Entry<String, List<Integer>>)it.next();
+  	        //get list of counts for this value where counts[0] = # occurance of val and counts[1-3] = # of this val that are L, B, R
+  	        List<Integer> counts = pair.getValue();
+  	        // H(label|attr) = #v1/total * H(#v1_L/#v1, #v1_B/#v1, #v1_R/#v1) + #v2/total * H(#v2_L/#v2, #v2_B/#v2, #v2_R/#v2) + ...
+  	        for(int i = 1; i < counts.size(); i++){
+  	        	//#v1/total * H(#v1_L/#v1, #v1_B/#v1, #v1_R/#v1) = #v1/total*H(#v1_L/#v1) + #v1/total*H(#v1_B/#v1) + #v1/total*H(#v1_R/#v1)
+  	        	if (counts.get(i) != 0){
+  	        		condHValue += -1*((double) counts.get(0)/total)*(Math.log((double) counts.get(i)/counts.get(0))/Math.log(2));
+  	        		System.out.println("HValue: " + HValue + " CondH: "+ condHValue + " Total: " + total + " counts.get(0): " + counts.get(0) + " counts.get(i): " + counts.get(i));
+  	        	}
+  	    	}
+  	    }
+  	    //add new condH to end of list.
+  	    condHList.add(condHValue);
+  	}
+
+  	//loop through condHList looking for attr that gives largest H(label) - H(label|attr)
+  	double minCondH = condHList.get(0);
+  	int indexOfBestAttr = 0;
+  	for (int i = 0; i < condHList.size(); i++){
+  		if(minCondH > condHList.get(i)){
+  			minCondH = condHList.get(i);
+  			indexOfBestAttr = i;
+  		}
+  	}
+  	//best attr will have same index in attributes that its condHValue had in the list of condHValues
+    	//return attributes.get(indexOfBestAttr);
+  	for(int i = 0; i < condHList.size(); i++){
+  		double hValTotal = HValue - condHList.get(i);
+  		System.out.format(train.attributes.get(i) + " %.5f\n", hValTotal);
+  	}
 
   }
   
@@ -160,7 +265,7 @@ public class DecisionTreeImpl extends DecisionTree {
 
   	boolean allTheSame = true;
   	String label;
-  	DecTreeNodeImpl node = null;
+  	DecTreeNodeImpl node;
 
 	//if list of examples is empty. 
     if (instances.isEmpty()){
@@ -189,7 +294,8 @@ public class DecisionTreeImpl extends DecisionTree {
     // find best attribute to split on TODO make helper fcn
     String bestAttr = getBestAttribute(attributes, instances);
     // remove this attr from attributes list (not the master one though)
-    attributes.remove(bestAttr);
+    List<String> updatedAttr = new ArrayList<String>(attributes);
+    updatedAttr.remove(bestAttr);
 
     // make a new node N with this attribute
     node = new DecTreeNodeImpl(null, bestAttr, null, false);
@@ -205,9 +311,9 @@ public class DecisionTreeImpl extends DecisionTree {
     			valInstances.add(i);
     	}
     	// new node = DecTreeNodeImplHelper(.....) (recursive call)
-    	DecTreeNodeImpl child = DecisionTreeImplHelper(valInstances, attributes, instances);
+    	DecTreeNodeImpl child = DecisionTreeImplHelper(valInstances, updatedAttr, instances);
     	// make new node a child of node N
-    	child.setParentValue(bestAttr);
+    	child.setParentValue(v);
     	node.children.add(child);
     }
 
@@ -262,6 +368,7 @@ public class DecisionTreeImpl extends DecisionTree {
 			}
 			map.put(value, counts);
 		}
+		listOfAttrMaps.add(map);
 	}
 	
 	//count occurences of L, B, R using this map
@@ -302,7 +409,7 @@ public class DecisionTreeImpl extends DecisionTree {
 	Iterator it = labelMap.entrySet().iterator();
     while (it.hasNext()) {
         Map.Entry pair = (Map.Entry)it.next();
-        HValue += -((double) pair.getValue()/total)*(Math.log((double) pair.getValue()/total)/Math.log(2));
+        HValue += -((double) (int)pair.getValue()/total)*(Math.log((double) (int)pair.getValue()/total)/Math.log(2));
     }
     
     
