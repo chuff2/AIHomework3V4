@@ -291,7 +291,7 @@ public class DecisionTreeImpl extends DecisionTree {
 
 		//if list of examples is empty. 
 		if (instances.isEmpty()){
-			return mostCommonClass(instances);
+			return mostCommonClass(parentInstances);
 		}
 
 		//sets allTheSame to false if it finds any labels different
@@ -308,7 +308,7 @@ public class DecisionTreeImpl extends DecisionTree {
 
 		//return most common from parent if no more attributes to split on
 		if (attributes.isEmpty()){
-			return mostCommonClass(parentInstances);
+			return mostCommonClass(instances);
 		}
 
 		///////////////////// SUDO
