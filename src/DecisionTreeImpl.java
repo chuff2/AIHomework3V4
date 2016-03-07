@@ -73,7 +73,12 @@ public class DecisionTreeImpl extends DecisionTree {
     this.attributeValues = train.attributeValues;
     // TODO: add code here
     
-  //list of attribute maps (each of A1, A2, A3, ... has its own map)
+    ////////////////////////////////////////////////////////////////////////////////////
+    //makes a list of maps (each corresponding to an attribute (A1, A2, etc)) and then for each
+    //one of them, go through all the (global) possible values (1,2,3,4...) and zero out
+    //their respective counts. I.e. A1->1 = 0
+    ////////////////////////////////////////////////////////////////////////////////////
+    //list of attribute maps (each of A1, A2, A3, ... has its own map)
   	List<HashMap<String, List<Integer>>> listOfAttrMaps = new ArrayList<HashMap<String, List<Integer>>>();
   	//zeroing out the map at every possible attribute and each attribute's values
   	for (String singleAttribute : this.attributes){
@@ -92,6 +97,9 @@ public class DecisionTreeImpl extends DecisionTree {
   		listOfAttrMaps.add(map);
   	}
   	
+  	////////////////////////////////////////////////////////////////////////////////////
+	//
+	////////////////////////////////////////////////////////////////////////////////////
   	//count occurences of L, B, R using this map
   	HashMap<String, Integer> labelMap = new HashMap<String, Integer>();
   	//looping through all the instances
@@ -123,7 +131,9 @@ public class DecisionTreeImpl extends DecisionTree {
   		
   	}
   	
-  	
+  	////////////////////////////////////////////////////////////////////////////////////
+	//
+	////////////////////////////////////////////////////////////////////////////////////
   	//loop through key's (labels (L, B, R)) and start forming the H value through its formula
   	double HValue = 0;
   	double total = (double) train.instances.size();
@@ -133,7 +143,9 @@ public class DecisionTreeImpl extends DecisionTree {
           HValue += -((double) (int)pair.getValue()/total)*(Math.log((double) (int)pair.getValue()/total)/Math.log(2));
       }
       
-      
+    ////////////////////////////////////////////////////////////////////////////////////
+  	//
+  	////////////////////////////////////////////////////////////////////////////////////
   	//single loop going through A1, A2, A3, A4 (only the ones passed in/still left to choose from)
     List<Double> condHList = new ArrayList<Double>(); 
   	for (String singleAttribute : attributes){
@@ -161,7 +173,10 @@ public class DecisionTreeImpl extends DecisionTree {
   	    //add new condH to end of list.
   	    condHList.add(condHValue);
   	}
-
+  	
+  	////////////////////////////////////////////////////////////////////////////////////
+	//
+	////////////////////////////////////////////////////////////////////////////////////
   	//loop through condHList looking for attr that gives largest H(label) - H(label|attr)
   	double minCondH = condHList.get(0);
   	int indexOfBestAttr = 0;
@@ -171,6 +186,9 @@ public class DecisionTreeImpl extends DecisionTree {
   			indexOfBestAttr = i;
   		}
   	}
+  	////////////////////////////////////////////////////////////////////////////////////
+	//
+	////////////////////////////////////////////////////////////////////////////////////
   	//best attr will have same index in attributes that its condHValue had in the list of condHValues
     	//return attributes.get(indexOfBestAttr);
   	for(int i = 0; i < condHList.size(); i++){
